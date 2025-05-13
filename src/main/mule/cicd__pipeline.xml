@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="9e5476d5-0f2f-41dc-a8bf-cb5d37bf7c22" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="793f0d12-8532-4a6e-b81f-e50ad9fc7fa2" basePath="/api/v1">
+		<http:request-connection host="dummy.restapiexample.com" />
+	</http:request-config>
+	<flow name="cicd__pipelineFlow" doc:id="412975ad-e365-4eea-b8ec-a12aa5faac3c" >
+		<http:listener doc:name="Listener" doc:id="da4bdd17-2e3e-4d49-955e-e3b7c9c82855" config-ref="HTTP_Listener_config" path="/cicd/{id}" />
+		<http:request method="GET" doc:name="Request" doc:id="27cde9c0-7af0-4a8e-9c7e-e6338029e502" config-ref="HTTP_Request_configuration" path="/employee/{id}">
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"id" : attributes.uriParams.id
+}]]]></http:uri-params>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"id" : "attributes.uriParams.id"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="8fd448ca-a4fd-41fe-8a8b-79ed9efee9ba" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
